@@ -4,3 +4,11 @@
 * plot.check_mboost.R: script for plotting function(s)
 * diagnostic_functions.R: script containing all provided diagnostic functions
 
+TODOs:
+
+* [ ] write plot functions
+* [ ] complete check_mboost function
+* [ ] test functions
+* [ ] simulation study
+* [ ] write documentary
+* [ ] pull request to mboost
