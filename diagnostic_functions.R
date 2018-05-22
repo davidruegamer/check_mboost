@@ -1,4 +1,18 @@
 #########################################################################
+########### helper functions ############################################
+#########################################################################
+
+# calculate cumsum per factor 
+cumsum_grouped <- function(x, fac) {
+  # x: numeric vector to be summed over
+  # fac: factor of the same length as x indicating the grouping sructure for which cumsum is computed sperately. If fac is not a factor, as.factor(fac) is used.
+  stopifnot(length(x) == length(fac))
+  cusu <- numeric(length = length(x))
+  cusu[order(fac)] <- unlist( tapply(x, fac, cumsum) )
+  return(cusu)
+}
+
+#########################################################################
 ########### functions which return scalar (iteration specific) ##########
 #########################################################################
 
@@ -51,5 +65,27 @@ gmdl_edf2 <- function(object, trhatsq){
   log((sum(object$response^2) - object$risk()[-1])/
         (edf2(object, trhatsq) * s_edf2(object, trhatsq)))
   
+}
+
+
+
+# extract cummulated explained risk / learner
+## note that the function relies on risk() and, thus, returns the inbag / out of bag risk depending on boost_control()
+## note that in mboost the risk corresponds to the summ of the loss rather than its mean -> we use the mean
+extract_cum_expl_risk <- function(object) {
+  risk_diff <- - diff(risk(object))/length(object$response)
+  learner_selected <- selected(object)
+  explained_risk <- cumsum_grouped(risk_diff, learner_selected)
+  attr( explained_risk, "initial_risk") <- risk(object)[1]/length(object$response)
+  return( explained_risk )
+}
+
+# extract selection path
+extract_sel_path <- function(object) {
+  learner_selected <- selected(object)
+  sels <- integer(length = length(learner_selected))
+  sels[order(learner_selected)] <- unlist( sapply( as.numeric(table(learner_selected)), function(n) 1L:n ) )
+  attr( sels, "mstop" ) <- mstop(object)
+  return(sels)
 }
 
