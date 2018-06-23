@@ -79,6 +79,14 @@ check_mboost <- function(
       extract_cum_expl_risk(object)
   )
   
+  # exclude gMDL in case the repsonse is not numeric
+  if(!is.numeric(object$response) | !is.integer(object$response))
+  {
+    
+    what <- setdiff(what, c("gMDL1", "gMDL2"))
+    
+  }
+  
   default_funs <- default_funs[names(default_funs) %in% what]
   
   # define place holders
@@ -123,8 +131,8 @@ check_mboost <- function(
 
   ####### attributes
     
-  attr(res, "dfinit") <- extract(object, "df")  
-  attr(res, "lambda") <- extract(object, "lambda")
+  attr(res, "dfinit") <- if(class(object)[1] == "glmboost") NA else extract(object, "df")  
+  attr(res, "lambda") <- if(class(object)[1] == "glmboost") NA else extract(object, "lambda")
     
   class(res) <- c("check_mboost", "data.frame")
   
