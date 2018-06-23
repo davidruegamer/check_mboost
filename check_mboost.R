@@ -28,7 +28,9 @@ check_mboost <- function(
            "AIC1", "AIC2", 
            "AICc1", "AICc2", 
            "BIC1", "BIC2", 
-           "gMDL1", "gMDL2"),
+           "gMDL1", "gMDL2",
+           "selectionFreq", 
+           "cumulativeExplainedRisk"),
   FUN_iter = list(), # list(example = function(object) trhatsq(object)),
   FUN_obj = list(), # list(example2 = function(object) mstop(object)),
   ...
