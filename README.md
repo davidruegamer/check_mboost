@@ -9,6 +9,8 @@ TODOs:
 * [ ] write plot functions
 * [ ] complete check_mboost function
 * [ ] test functions
-* [ ] simulation study -> KLD, special residuals
+* [ ] hat values calculation more efficient (step 1: calculate first, then criteria, step 2: efficient getUps)
+* [ ] simulation study -> KLD, special residuals, KLD Binomial / Poisson
 * [ ] write documentary
 * [ ] pull request to mboost
+* [ ] check whether residual matrix / hat matrix stuff works, especially for losses other than L2-loss

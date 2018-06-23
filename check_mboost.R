@@ -79,11 +79,37 @@ check_mboost <- function(
       extract_cum_expl_risk(object)
   )
   
+  # redefine hatvalues function if object not glm/gambosot
+  if(!("glmboost" %in% class(object)) & !("gamboost" %in% class(object)))
+  {
+    
+    hatval <<- function(object)
+    {
+      
+      ups <- getUpsilons(object)
+      resToHat <- function(mat){
+        mat <- -1*mat
+        diag(mat) <- diag(mat) + 1
+        return(mat)
+      }
+      hm <- resToHat(ups[[length(ups)]])
+      res <- diag(hm)
+      attr(res, "hatmatrix") <- hm
+      attr(res, "trace") <- sapply(ups[2:(mstop(object)+1)], 
+                                   function(x) sum(diag(resToHat(x))))
+      
+      return(res)
+      
+    }
+    
+  }
+  
   # exclude gMDL in case the repsonse is not numeric
   if(!is.numeric(object$response) | !is.integer(object$response))
   {
     
     what <- setdiff(what, c("gMDL1", "gMDL2"))
+    
     
   }
   

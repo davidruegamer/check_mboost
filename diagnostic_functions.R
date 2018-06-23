@@ -19,14 +19,17 @@ cumsum_grouped <- function(x, fac) {
 
 # trace of the squared hat matrix
 trhatsq <- function(object) 
-  sum(diag(crossprod(attr(hatvalues(object), "hatmatrix"))))
+  sum(diag(crossprod(attr(hatval(object), "hatmatrix"))))
 
 #########################################################################
 ########### functions which return vector ###############################
 #########################################################################
 
+# default definition of hatvalues function, which is eventually overwritten
+hatval <- function(object) hatvalues(object)
+
 # original definition of edf
-edf1 <- function(object) attr(hatvalues(object), "trace")
+edf1 <- function(object) attr(hatval(object), "trace")
 # edf definition particularly used for additive models
 edf2 <- function(object, trhatsq) 2 * edf1(object) - trhatsq
 
