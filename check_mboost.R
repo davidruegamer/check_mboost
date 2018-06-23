@@ -90,7 +90,7 @@ check_mboost <- function(
   default_funs <- default_funs[names(default_funs) %in% what]
   
   # define place holders
-  trhatsqres <- rep(NA, mstopinit)
+  trhatsqres <- resSq <- rep(NA, mstopinit)
   deffunres <- funitres <- NULL
   if(length(default_funs) > 0) 
     deffunres <- matrix(NA, nrow = mstopinit, ncol = length(default_funs))
@@ -100,6 +100,7 @@ check_mboost <- function(
   for(m in mstopinit:1){
     
     trhatsqres[m] <- trhatsq(object[m])
+    resSq[m] <- as.numeric(var(object[m]$resid()))
 
     if(length(FUN_iter) > 0) 
       funitres[m,] <- sapply(FUN_iter, function(fun) fun(object[m]))
@@ -128,6 +129,7 @@ check_mboost <- function(
   res <- data.frame(selection = selcourse)
   if(!is.null(iterfunres)) res <- cbind(res, iterfunres)
   if(!is.null(vecfunres)) res <- cbind(res, vecfunres)
+  res$residualVariance <- resSq
 
   ####### attributes
     

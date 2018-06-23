@@ -9,6 +9,6 @@ TODOs:
 * [ ] write plot functions
 * [ ] complete check_mboost function
 * [ ] test functions
-* [ ] simulation study
+* [ ] simulation study -> KLD, special residuals
 * [ ] write documentary
 * [ ] pull request to mboost
