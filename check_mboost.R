@@ -41,7 +41,6 @@ check_mboost <- function(
   
   ####### global definitions
   weights <- model.weights(object)
-  sumw <- sum(weights[!is.na(fitted(object))])
   n <- length(object$response)
   mstopinit <- mstop(object)
   selcourse <- selected(object)
@@ -53,37 +52,6 @@ check_mboost <- function(
     stop("Diagnostic tool not meaningful for objects fitted for zero iterations.")
   
   ####### apply iterative functions
-  
-  default_funs <- list(
-    # some more functions here ...,
-  )
-  default_funs <- default_funs[names(default_funs) %in% what]
-  
-  # define place holders
-  trhatsqres <- rep(NA, mstopinit)
-  deffunres <- funitres <- NULL
-  if(length(default_funs) > 0) 
-    deffunres <- matrix(NA, nrow = mstopinit, ncol = length(default_funs))
-  if(length(FUN_iter) > 0) 
-    funitres <- matrix(NA, nrow = mstopinit, ncol = length(FUN_iter))
-  
-  for(m in mstopinit:1){
-    
-    trhatsqres[m] <- trhatsq(object[m])
-    if(length(default_funs) > 0) 
-      deffunres <- sapply(default_funs, function(fun) fun(object[m]))
-    if(length(FUN_iter) > 0) 
-      funitres[m,] <- sapply(FUN_iter, function(fun) fun(object[m]))
-  
-  }
-
-  iterfunres <- cbind(deffunres, funitres)
-  if(!is.null(iterfunres)) names(iterfunres) <- c(names(default_funs),
-                                                  names(FUN_iter))
-  
-  ####### apply vec functions
-
-  object[mstopinit]
   
   default_funs <- list(
     # some more functions here ...,
@@ -102,11 +70,38 @@ check_mboost <- function(
       bic_edf2(object, trhatsq = trhatsqres),
     gMDL1 = function(object) gmdl_edf1(object), 
     gMDL2 = function(object) 
-      gmdl_edf2(object, trhatsq = trhatsqres)
+      gmdl_edf2(object, trhatsq = trhatsqres),
+    selectionFreq = function(object) 
+      extract_sel_path(object),
+    cumulativeExplainedRisk = function(object)
+      extract_cum_expl_risk(object)
   )
   
   default_funs <- default_funs[names(default_funs) %in% what]
+  
+  # define place holders
+  trhatsqres <- rep(NA, mstopinit)
+  deffunres <- funitres <- NULL
+  if(length(default_funs) > 0) 
+    deffunres <- matrix(NA, nrow = mstopinit, ncol = length(default_funs))
+  if(length(FUN_iter) > 0) 
+    funitres <- matrix(NA, nrow = mstopinit, ncol = length(FUN_iter))
+  
+  for(m in mstopinit:1){
     
+    trhatsqres[m] <- trhatsq(object[m])
+
+    if(length(FUN_iter) > 0) 
+      funitres[m,] <- sapply(FUN_iter, function(fun) fun(object[m]))
+  
+  }
+
+  iterfunres <- funitres
+  if(!is.null(iterfunres)) names(iterfunres) <- c(names(FUN_iter))
+  
+  ####### apply vec functions
+
+  invisible(object[mstopinit])
   
   FUN_obj <- 
     c(default_funs,
@@ -129,7 +124,7 @@ check_mboost <- function(
   attr(res, "dfinit") <- extract(object, "df")  
   attr(res, "lambda") <- extract(object, "lambda")
     
-  class(res) <- "check_mboost"  
+  class(res) <- c("check_mboost", "data.frame")
   
   ####### plot
   
