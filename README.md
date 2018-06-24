@@ -9,7 +9,7 @@ TODOs:
 * [ ] write plot functions
 * [ ] complete check_mboost function
 * [ ] test functions
-* [ ] hat values calculation more efficient (step 1: calculate first, then criteria, step 2: efficient getUps)
+* [ ] hat values calculation more efficient?
 * [ ] simulation study -> KLD, special residuals, KLD Binomial / Poisson
 * [ ] write documentary
 * [ ] pull request to mboost

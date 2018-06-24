@@ -53,59 +53,60 @@ check_mboost <- function(
   if(mstopinit == 0)
     stop("Diagnostic tool not meaningful for objects fitted for zero iterations.")
   
+  ####### get model degrees of freedom
+  
+  if(!("glmboost" %in% class(object)) & !("gamboost" %in% class(object)))
+  {
+    
+   ups <- getUpsilons(object)
+   resToHat <- function(mat){
+     mat <- -1*mat
+     diag(mat) <- diag(mat) + 1
+     return(mat)
+   }
+   traceHat <- sapply(ups[2:(mstop(object)+1)], 
+                      function(x) sum(diag(resToHat(x))))
+   traceHatHat <- sapply(ups[2:(mstop(object)+1)], 
+                         function(x) sum(diag(crossprod(resToHat(x)))))
+    
+     
+  }else{
+    
+    traceHatHat <- sapply(1:mstopinit, function(m)
+      sum(diag(crossprod(attr(hatval(object[m]), "hatmatrix")))))
+    traceHat <- attr(hatvalues(object[mstopinit]), "trace")
+      
+  }
+  
   ####### apply iterative functions
   
   default_funs <- list(
     # some more functions here ...,
     inbagrisk = function(object) object$risk()[-1],
-    edf1 = function(object) edf1(object), 
-    edf2 = function(object) 
-      edf2(object, trhatsq = trhatsqres),
-    AIC1 = function(object) aicclas_edf1(object),
+    AIC1 = function(object) 
+      aicclas_edf1(object, trhat = traceHat),
     AIC2 = function(object) 
-      aicclas_edf2(object, trhatsq = trhatsqres),
-    AICc1 = function(object) aiccor_edf1(object),
+      aicclas_edf2(object, trhat = traceHat, trhatsq = traceHatHat),
+    AICc1 = function(object) 
+      aiccor_edf1(object, trhat = traceHat),
     AICc2 = function(object) 
-      aiccor_edf2(object, trhatsq = trhatsqres),
-    BIC1 = function(object) bic_edf1(object), 
+      aiccor_edf2(object, trhat = traceHat, trhatsq = traceHatHat),
+    BIC1 = function(object) 
+      bic_edf1(object, trhat = traceHat), 
     BIC2 = function(object) 
-      bic_edf2(object, trhatsq = trhatsqres),
-    gMDL1 = function(object) gmdl_edf1(object), 
+      bic_edf2(object, trhat = traceHat, trhatsq = traceHatHat),
+    gMDL1 = function(object) 
+      gmdl_edf1(object, trhat = traceHat), 
     gMDL2 = function(object) 
-      gmdl_edf2(object, trhatsq = trhatsqres),
+      gmdl_edf2(object, trhat = traceHat, trhatsq = traceHatHat),
     selectionFreq = function(object) 
       extract_sel_path(object),
     cumulativeExplainedRisk = function(object)
       extract_cum_expl_risk(object)
   )
   
-  # redefine hatvalues function if object not glm/gambosot
-  if(!("glmboost" %in% class(object)) & !("gamboost" %in% class(object)))
-  {
-    
-    hatval <<- function(object)
-    {
-      
-      ups <- getUpsilons(object)
-      resToHat <- function(mat){
-        mat <- -1*mat
-        diag(mat) <- diag(mat) + 1
-        return(mat)
-      }
-      hm <- resToHat(ups[[length(ups)]])
-      res <- diag(hm)
-      attr(res, "hatmatrix") <- hm
-      attr(res, "trace") <- sapply(ups[2:(mstop(object)+1)], 
-                                   function(x) sum(diag(resToHat(x))))
-      
-      return(res)
-      
-    }
-    
-  }
-  
   # exclude gMDL in case the repsonse is not numeric
-  if(!is.numeric(object$response) | !is.integer(object$response))
+  if(!is.numeric(object$response))
   {
     
     what <- setdiff(what, c("gMDL1", "gMDL2"))
@@ -116,7 +117,7 @@ check_mboost <- function(
   default_funs <- default_funs[names(default_funs) %in% what]
   
   # define place holders
-  trhatsqres <- resSq <- rep(NA, mstopinit)
+  resSq <- rep(NA, mstopinit)
   deffunres <- funitres <- NULL
   if(length(default_funs) > 0) 
     deffunres <- matrix(NA, nrow = mstopinit, ncol = length(default_funs))
@@ -125,7 +126,6 @@ check_mboost <- function(
   
   for(m in mstopinit:1){
     
-    trhatsqres[m] <- trhatsq(object[m])
     resSq[m] <- as.numeric(var(object[m]$resid()))
 
     if(length(FUN_iter) > 0) 
@@ -156,6 +156,8 @@ check_mboost <- function(
   if(!is.null(iterfunres)) res <- cbind(res, iterfunres)
   if(!is.null(vecfunres)) res <- cbind(res, vecfunres)
   res$residualVariance <- resSq
+  res$edf1 <- traceHat
+  res$edf2 = edf2(trhat = traceHat, trhatsq = traceHatHat)
 
   ####### attributes
     
