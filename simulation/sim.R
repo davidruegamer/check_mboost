@@ -1,6 +1,6 @@
 library(mboost)
 library(devtools)
-load_all("../check.mboost/")
+load_all("../R")
 
 # save results?
 save <- FALSE
