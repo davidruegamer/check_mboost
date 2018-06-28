@@ -11,6 +11,8 @@
 #' @param FUN_obj a named list of functions
 #' that are applied on the given mboost object and return
 #' in the results
+#' @param ups if available a list of residual matrices of each iteration
+#' as returned by the \code{getUpsilons} function.
 #' @param ... further paramters passed to ??
 #' @return A data.frame with diagnostic measures
 #'
@@ -19,6 +21,8 @@
 #'                     control = boost_control(mstop = 50))
 #' res <- check_mboost(cars.gb)
 #' str(res,1)
+#' @export
+#' @import mboost
 #'
 check_mboost <- function(
   object,
@@ -33,6 +37,7 @@ check_mboost <- function(
            "cumulativeExplainedRisk"),
   FUN_iter = list(), # list(example = function(object) trhatsq(object)),
   FUN_obj = list(), # list(example2 = function(object) mstop(object)),
+  ups = NULL,
   ...
 )
 {
@@ -58,7 +63,7 @@ check_mboost <- function(
   if(!("glmboost" %in% class(object)) & !("gamboost" %in% class(object)))
   {
     
-   ups <- getUpsilons(object)
+   if(is.null(ups)) ups <- getUpsilons(object)
    resToHat <- function(mat){
      mat <- -1*mat
      diag(mat) <- diag(mat) + 1

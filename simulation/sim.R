@@ -1,9 +1,13 @@
+library(mboost)
+library(devtools)
+load_all("../check.mboost/")
+
 # save results?
 save <- FALSE
 # number of simulation repetitions
 simReps <- 1000
 # maximal mstop
-fix_mstop <- 500
+fix_mstop <- 2000
 # number observations
 n <- 300
 
@@ -115,6 +119,7 @@ for(this_set in 1:nrow(settings)){
     y <- as.numeric(scale(mu + rnorm(n, 0, this_sigma), scale=F))
     modOrg <- mboost_fit(blList, offset = 0, response = y, 
                          control = boost_control(nu = this_nu, mstop = fix_mstop))
+    ups <- getUpsilons(modOrg)
     
     cvr <- cvrisk(object = modOrg, 
                   folds = cv(model.weights(modOrg), 
@@ -122,9 +127,11 @@ for(this_set in 1:nrow(settings)){
                   papply = lapply)
     
     
-    cmr <- check_mboost(modOrg)
+    cmr <- check_mboost(modOrg, ups = ups)
+    kld <- trace_KLD(modOrg, mu = mu, sigma = this_sigma, family = "Gaussian")
     res <- list(checkRes = cmr, 
                 resampRes = cvr,
+                kldist = kld,
                 nr = nr)
     
     return(res)
