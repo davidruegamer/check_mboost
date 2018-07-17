@@ -1,0 +1,13 @@
+Package: check.mboost
+Type: Package
+Title: Diagnostic function for mboost models
+Version: 0.3
+Date: 2015-12-22
+Author: Almond Stoecker and David Ruegamer
+Maintainer: David Ruegamer <david.ruegamer@gmail.com>
+Depends: mboost
+escription: Diagnostic function for mboost models
+License: GPL (>= 2)
+Packaged: 2016-01-24 08:20:50 UTC; ruegamer
+NeedsCompilation: no
+RoxygenNote: 6.0.1
