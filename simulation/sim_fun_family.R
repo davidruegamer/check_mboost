@@ -5,7 +5,7 @@ library(FDboost)
 
 scalar_L2 <- Gaussian()
 
-
+# function calculating trapezoidal rule weights for one function
 trapez_weights <- function(t, range) {
   t_diffs <- diff( c(range[1], sort(t), range[2]) )
   t_diffs[-c(1,length(t_diffs))] <- t_diffs[-c(1,length(t_diffs))]/2
