@@ -10,7 +10,7 @@ trapez_weights <- function(t, range) {
   t_diffs <- diff( c(range[1], sort(t), range[2]) )
   t_diffs[-c(1,length(t_diffs))] <- t_diffs[-c(1,length(t_diffs))]/2
   weights_sorted <- t_diffs[-1] + t_diffs[-length(t_diffs)] 
-  return(weights_sorted[order(t)])
+  return(weights_sorted[order(order(t))])
 }
 
 
